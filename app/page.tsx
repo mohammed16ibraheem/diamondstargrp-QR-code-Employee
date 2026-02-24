@@ -3,29 +3,39 @@
 import Image from "next/image";
 import { useMemo, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
+import contactsList from "./data/contacts.json";
 
 type Contact = {
+  sn: string;
+  section: string;
   name: string;
   title: string;
+  nameArabic?: string;
+  titleArabic?: string;
   company: string;
   email: string;
   phonePrimary: string;
   phoneSecondary?: string;
   location: string;
-  extra?: string;
 };
 
+const contacts = contactsList as Contact[];
+const sections = ["GREEN CITY", "DSA Group"] as const;
+
 export default function Home() {
-  const [selectedContact] = useState<Contact>({
-    name: "Khalid Mohsin Al",
-    title: "Executive Director",
-    company: "Niemat Altayibat Food Products Factory",
-    email: "ktanwar@namma-alenjaz.co",
-    phonePrimary: "+966 50 463 668",
-    phoneSecondary: "+966 12 670 4100",
-    location: "Building No. 2302, Unit 453, Ad-Dahiah District, Jeddah 21429, Saudi Arabia",
-    extra: "Diamond Star / Namma Al Enjaz Group",
-  });
+  const [selectedSection, setSelectedSection] = useState<(typeof sections)[number]>("GREEN CITY");
+  const [selectedEmployeeIndex, setSelectedEmployeeIndex] = useState(0);
+
+  const contactsInSection = useMemo(
+    () => contacts.filter((c) => c.section === selectedSection),
+    [selectedSection]
+  );
+  const selectedContact = contactsInSection[selectedEmployeeIndex] ?? contactsInSection[0];
+
+  const handleSectionChange = (section: (typeof sections)[number]) => {
+    setSelectedSection(section);
+    setSelectedEmployeeIndex(0);
+  };
 
   const vcardText = useMemo(() => {
     // vCard 3.0: use CRLF and fold long lines at 75 chars so phones recognize it
@@ -47,12 +57,14 @@ export default function Home() {
       fold(`FN:${selectedContact.name}`),
       fold(`ORG:${selectedContact.company}`),
       fold(`TITLE:${selectedContact.title}`),
-      fold(`EMAIL;TYPE=INTERNET:${selectedContact.email}`),
-      fold(`TEL;TYPE=CELL:${selectedContact.phonePrimary.replace(/\s/g, "")}`),
+      selectedContact.email && selectedContact.email.includes("@")
+        ? fold(`EMAIL;TYPE=INTERNET:${selectedContact.email}`)
+        : "",
+      selectedContact.phonePrimary ? fold(`TEL;TYPE=CELL:${selectedContact.phonePrimary.replace(/\s/g, "")}`) : "",
       selectedContact.phoneSecondary
         ? fold(`TEL;TYPE=WORK,VOICE:${selectedContact.phoneSecondary.replace(/\s/g, "")}`)
         : "",
-      fold(`ADR;TYPE=WORK:;;${selectedContact.location};;;;;`),
+      selectedContact.location ? fold(`ADR;TYPE=WORK:;;${selectedContact.location};;;;;`) : "",
       "END:VCARD",
     ].filter(Boolean);
 
@@ -107,6 +119,40 @@ export default function Home() {
             </div>
 
             <div className="relative flex flex-col gap-7 sm:gap-8">
+              <div className="space-y-4 rounded-xl border border-white/10 bg-black/30 p-3 sm:p-4">
+                <div>
+                  <label className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                    1. Select section
+                  </label>
+                  <select
+                    value={selectedSection}
+                    onChange={(e) => handleSectionChange(e.target.value as (typeof sections)[number])}
+                    className="w-full rounded-lg border border-white/20 bg-slate-800/80 px-3 py-2.5 text-sm text-slate-100 focus:border-emerald-400/60 focus:outline-none focus:ring-2 focus:ring-emerald-400/30"
+                  >
+                    {sections.map((sec) => (
+                      <option key={sec} value={sec}>
+                        {sec}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                    2. Select employee
+                  </label>
+                  <select
+                    value={selectedEmployeeIndex}
+                    onChange={(e) => setSelectedEmployeeIndex(Number(e.target.value))}
+                    className="w-full rounded-lg border border-white/20 bg-slate-800/80 px-3 py-2.5 text-sm text-slate-100 focus:border-emerald-400/60 focus:outline-none focus:ring-2 focus:ring-emerald-400/30"
+                  >
+                    {contactsInSection.map((c, i) => (
+                      <option key={`${c.section}-${c.sn}-${i}`} value={i}>
+                        {c.name} — {c.title}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
               <header className="flex items-start justify-between gap-3 md:gap-4">
                 <div className="min-w-0">
                   <p className="text-[10px] sm:text-xs uppercase tracking-[0.25em] text-emerald-300/80">
@@ -118,12 +164,18 @@ export default function Home() {
                   <p className="mt-1.5 text-sm sm:text-base text-slate-300">
                     {selectedContact.title}
                   </p>
-                  <p className="mt-1 text-[13px] sm:text-sm font-medium text-emerald-300">
-                    {selectedContact.company}
+                  <p className="mt-1 flex flex-wrap items-center gap-2">
+                    <span className="text-[13px] sm:text-sm font-medium text-emerald-300">
+                      {selectedContact.company}
+                    </span>
+                    <span className="rounded border border-white/20 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-wider text-slate-400">
+                      {selectedContact.section}
+                    </span>
                   </p>
-                  {selectedContact.extra && (
-                    <p className="mt-1 text-[11px] sm:text-xs text-slate-400">
-                      {selectedContact.extra}
+                  {selectedContact.nameArabic && (
+                    <p className="mt-1 text-[12px] text-slate-400" dir="rtl">
+                      {selectedContact.nameArabic}
+                      {selectedContact.titleArabic && ` · ${selectedContact.titleArabic}`}
                     </p>
                   )}
                 </div>
@@ -175,20 +227,31 @@ export default function Home() {
                         </span>
                       </a>
                     )}
-                    <a
-                      href={`mailto:${selectedContact.email}`}
-                      className="flex items-center justify-between rounded-xl bg-black/30 px-3 py-2.5 text-slate-100 ring-1 ring-white/5 transition hover:bg-black/60 hover:ring-emerald-400/40 active:scale-[0.99]"
-                    >
-                      <span className="mr-4">
-                        Email
-                        <span className="block max-w-48 truncate text-[11px] text-slate-300 sm:max-w-[16rem] sm:text-xs">
-                          {selectedContact.email}
+                    {selectedContact.email && selectedContact.email.includes("@") ? (
+                      <a
+                        href={`mailto:${selectedContact.email}`}
+                        className="flex items-center justify-between rounded-xl bg-black/30 px-3 py-2.5 text-slate-100 ring-1 ring-white/5 transition hover:bg-black/60 hover:ring-emerald-400/40 active:scale-[0.99]"
+                      >
+                        <span className="mr-4">
+                          Email
+                          <span className="block max-w-48 truncate text-[11px] text-slate-300 sm:max-w-[16rem] sm:text-xs">
+                            {selectedContact.email}
+                          </span>
                         </span>
-                      </span>
-                      <span className="shrink-0 rounded-full bg-slate-50/5 px-2 py-1 text-[11px] font-semibold text-slate-200">
-                        Tap
-                      </span>
-                    </a>
+                        <span className="shrink-0 rounded-full bg-slate-50/5 px-2 py-1 text-[11px] font-semibold text-slate-200">
+                          Tap
+                        </span>
+                      </a>
+                    ) : selectedContact.email ? (
+                      <div className="flex items-center justify-between rounded-xl bg-black/30 px-3 py-2.5 text-slate-100 ring-1 ring-white/5">
+                        <span className="mr-4">
+                          Email
+                          <span className="block max-w-48 truncate text-[11px] text-slate-300 sm:max-w-[16rem] sm:text-xs">
+                            {selectedContact.email}
+                          </span>
+                        </span>
+                      </div>
+                    ) : null}
                   </div>
                 </div>
 
@@ -197,7 +260,7 @@ export default function Home() {
                     Office
                   </p>
                   <p className="text-[13px] sm:text-sm leading-relaxed text-slate-200">
-                    {selectedContact.location}
+                    {selectedContact.location || "—"}
                   </p>
                   <button
                     onClick={handleDownloadVcard}
@@ -234,16 +297,18 @@ export default function Home() {
                 </div>
 
                 <div className="mt-2 flex flex-col items-center gap-4 rounded-2xl border border-slate-700/80 bg-slate-900/90 p-3.5 sm:p-4 shadow-inner shadow-black/60">
-                  <div className="relative rounded-2xl bg-white p-2.5 shadow-lg shadow-black/40 sm:p-3">
+                  <div className="relative overflow-hidden rounded-2xl bg-slate-900 p-2 shadow-lg shadow-black/40 sm:p-2.5">
+                    <div className="rounded-xl bg-white p-2 sm:p-2.5">
                     <QRCodeSVG
                       value={qrValue}
                       size={176}
                       bgColor="#ffffff"
                       fgColor="#020617"
                       level="H"
-                      includeMargin
+                      includeMargin={false}
                     />
-                    <div className="absolute inset-0 flex items-center justify-center">
+                    </div>
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                       <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-lg bg-white shadow-[0_0_24px_rgba(255,255,255,0.7),0_0_48px_rgba(255,255,255,0.35)] sm:h-16 sm:w-16">
                         <Image
                           src="/logo-profile.png"
@@ -257,8 +322,11 @@ export default function Home() {
                     </div>
                   </div>
                   <p className="max-w-xs text-center text-[11px] sm:text-xs text-slate-400">
-                    Tip for iPhone &amp; Android: open the Camera app, point at
-                    the QR, then tap the banner to save the contact.
+                    Same QR style for every employee. Scan to save this
+                    contact.
+                  </p>
+                  <p className="max-w-xs text-center text-[10px] text-slate-500">
+                    iPhone &amp; Android: open Camera, point at QR, tap banner to add.
                   </p>
                 </div>
               </div>
