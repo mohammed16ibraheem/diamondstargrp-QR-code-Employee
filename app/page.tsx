@@ -234,15 +234,27 @@ export default function Home() {
                 </div>
 
                 <div className="mt-2 flex flex-col items-center gap-4 rounded-2xl border border-slate-700/80 bg-slate-900/90 p-3.5 sm:p-4 shadow-inner shadow-black/60">
-                  <div className="rounded-2xl bg-white p-2.5 shadow-lg shadow-black/40 sm:p-3">
+                  <div className="relative rounded-2xl bg-white p-2.5 shadow-lg shadow-black/40 sm:p-3">
                     <QRCodeSVG
                       value={qrValue}
                       size={176}
                       bgColor="#ffffff"
                       fgColor="#020617"
-                      level="Q"
+                      level="H"
                       includeMargin
                     />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-lg bg-white shadow-[0_0_24px_rgba(255,255,255,0.7),0_0_48px_rgba(255,255,255,0.35)] sm:h-16 sm:w-16">
+                        <Image
+                          src="/logo-profile.png"
+                          alt=""
+                          width={64}
+                          height={64}
+                          className="h-full w-full object-cover"
+                          aria-hidden
+                        />
+                      </div>
+                    </div>
                   </div>
                   <p className="max-w-xs text-center text-[11px] sm:text-xs text-slate-400">
                     Tip for iPhone &amp; Android: open the Camera app, point at
