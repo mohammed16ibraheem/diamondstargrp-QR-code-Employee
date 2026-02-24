@@ -78,13 +78,13 @@ export default function Home() {
       <main className="w-full max-w-6xl rounded-3xl border border-white/10 bg-white/5 shadow-2xl shadow-black/50 backdrop-blur-xl overflow-hidden">
         <div className="border-b border-white/5 bg-black/20 px-4 py-4 sm:px-7 sm:py-5 md:px-8 flex items-center justify-between gap-4">
           <div className="flex items-center gap-4 min-w-0">
-            <div className="relative h-14 w-[180px] shrink-0 overflow-hidden rounded-xl bg-white p-2.5 shadow-md ring-1 ring-slate-200/80 sm:h-16 sm:w-[220px] md:h-[72px] md:w-[260px]">
+            <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full bg-slate-700 shadow-lg ring-2 ring-white/20 sm:h-14 sm:w-14 md:h-16 md:w-16">
               <Image
-                src="/logo.png"
-                alt="Diamond Star Arabia Industrial Company"
+                src="/logo-profile.png"
+                alt="Diamond Star"
                 fill
-                className="object-contain object-center"
-                sizes="(max-width: 640px) 180px, (max-width: 768px) 220px, 260px"
+                className="object-cover object-center"
+                sizes="64px"
                 priority
               />
             </div>
