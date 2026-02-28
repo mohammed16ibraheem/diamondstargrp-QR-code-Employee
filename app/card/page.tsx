@@ -1,5 +1,12 @@
-import { redirect } from "next/server";
+"use client";
+
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 export default function CardIndex() {
-  redirect("/");
+  const router = useRouter();
+  useEffect(() => {
+    router.replace("/");
+  }, [router]);
+  return null;
 }
