@@ -335,7 +335,7 @@ export default function Home() {
                     onClick={handleDownloadVcard}
                     className="mt-1 inline-flex w-full items-center justify-center rounded-xl bg-emerald-500 px-4 py-2.5 text-[13px] sm:text-sm font-semibold text-slate-950 shadow-lg shadow-emerald-500/40 transition hover:bg-emerald-400 active:scale-[0.99]"
                   >
-                    Save contact (vCard)
+                    Add to Contacts
                   </button>
                 </div>
               </div>

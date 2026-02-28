@@ -32,6 +32,7 @@ export function CardProfile({
   const vcardText = useMemo(() => {
     const c = contact;
     const CRLF = "\r\n";
+    const BOM = "\uFEFF"; // UTF-8 BOM for better mobile compatibility
     const escape = (s: string) =>
       String(s || "")
         .replace(/\\/g, "\\\\")
@@ -57,6 +58,7 @@ export function CardProfile({
     const lines = [
       "BEGIN:VCARD",
       "VERSION:3.0",
+      "PRODID:-//Diamond Star Group//Digital Visiting Card//EN",
       fold(`N:${name};;;`),
       fold(`FN:${name}`),
       fold(`ORG:${org}`),
@@ -67,16 +69,22 @@ export function CardProfile({
       loc ? fold(`ADR;TYPE=WORK:;;${loc};;;;;`) : "",
       "END:VCARD",
     ].filter(Boolean);
-    return lines.join(CRLF);
+    return BOM + lines.join(CRLF);
   }, [contact]);
 
-  const handleDownloadVcard = () => {
+  const handleAddToContacts = () => {
     const blob = new Blob([vcardText], { type: "text/vcard;charset=utf-8" });
     const url = URL.createObjectURL(blob);
+    const safeName = contact.name.replace(/[^\p{L}\p{N}\s-]/gu, "").replace(/\s+/g, " ").trim() || "contact";
+    const fileName = `${safeName}.vcf`;
+
     const a = document.createElement("a");
     a.href = url;
-    a.download = `${contact.name.replace(/\s+/g, "_")}.vcf`;
+    a.download = fileName;
+    a.setAttribute("download", fileName);
+    document.body.appendChild(a);
     a.click();
+    document.body.removeChild(a);
     URL.revokeObjectURL(url);
   };
 
@@ -187,14 +195,18 @@ export function CardProfile({
             </div>
           </div>
 
-          {/* Save contact */}
+          {/* Add to Contacts — works on iPhone & Android */}
           <div className="mt-6">
             <button
-              onClick={handleDownloadVcard}
-              className="w-full rounded-xl bg-emerald-500 px-4 py-3 text-sm font-semibold text-slate-950 shadow-lg transition hover:bg-emerald-400"
+              type="button"
+              onClick={handleAddToContacts}
+              className="w-full rounded-xl bg-emerald-500 px-4 py-4 text-base font-semibold text-slate-950 shadow-lg transition active:scale-[0.98] hover:bg-emerald-400"
             >
-              Save contact to phone (vCard)
+              Add to Contacts
             </button>
+            <p className="mt-2 text-center text-xs text-slate-500">
+              Saves to your phone — iPhone & Android. Tap the file if prompted to add.
+            </p>
           </div>
         </div>
 
@@ -218,6 +230,7 @@ export function CardProfile({
             </a>
             <a
               href={companyProfilePdf}
+              download="ds-company-profile-eng.pdf"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 rounded-xl bg-white/10 px-4 py-2.5 text-sm font-medium text-white ring-1 ring-white/20 transition hover:bg-white/20"
