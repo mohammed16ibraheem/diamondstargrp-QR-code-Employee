@@ -18,7 +18,7 @@ type Contact = {
 
 const contacts = contactsList as Contact[];
 const COMPANY_WEBSITE = "https://diamondstargrp.com/ar/";
-const COMPANY_PROFILE_PDF = "/company-profile.pdf";
+const COMPANY_PROFILE_PDF = "/ds-company-profile-eng.pdf";
 
 function getContact(section: string, sn: string): Contact | null {
   const s = decodeURIComponent(section);
