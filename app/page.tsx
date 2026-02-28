@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { QRCodeCanvas } from "qrcode.react";
 import contactsList from "./data/contacts.json";
 
@@ -37,8 +37,22 @@ export default function Home() {
     setSelectedEmployeeIndex(0);
   };
 
-  // QR/vCard is permanent per contact: same person always produces the same QR data (no date, no random).
-  // Data comes only from static contacts.json; same section+sn = same encoded vCard every time.
+  const [baseUrl, setBaseUrl] = useState("");
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    // Use production URL in QR so scans work from anywhere. Set NEXT_PUBLIC_APP_URL after deploy (e.g. Vercel).
+    const origin = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
+    setBaseUrl(origin);
+  }, []);
+
+  const cardPageUrl = useMemo(() => {
+    if (!baseUrl) return "";
+    return `${baseUrl}/card/${encodeURIComponent(selectedContact.section)}/${encodeURIComponent(selectedContact.sn)}`;
+  }, [baseUrl, selectedContact.section, selectedContact.sn]);
+
+  const qrValue = cardPageUrl;
+
+  // vCard for "Save contact" on the main page (optional) and used on the card page.
   const vcardText = useMemo(() => {
     const c = selectedContact;
     const CRLF = "\r\n";
@@ -91,7 +105,6 @@ export default function Home() {
     URL.revokeObjectURL(url);
   };
 
-  const qrValue = useMemo(() => vcardText, [vcardText]); // Same vCard => same QR image (permanent for this contact).
   const qrCanvasRef = useRef<HTMLCanvasElement>(null);
 
   const downloadQrImage = useCallback(() => {
@@ -355,34 +368,43 @@ export default function Home() {
                 <div className="mt-2 flex flex-col items-center gap-4 rounded-2xl border border-slate-700/80 bg-slate-900/90 p-3.5 sm:p-4 shadow-inner shadow-black/60">
                   <div className="relative overflow-hidden rounded-2xl bg-slate-900 p-2 shadow-lg shadow-black/40 sm:p-2.5">
                     <div className="relative rounded-xl bg-white p-2 sm:p-2.5">
-                      <QRCodeCanvas
-                        ref={qrCanvasRef}
-                        value={qrValue}
-                        size={176}
-                        bgColor="#ffffff"
-                        fgColor="#020617"
-                        level="H"
-                        includeMargin={false}
-                      />
-                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                        <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-lg bg-white shadow-[0_0_24px_rgba(255,255,255,0.7),0_0_48px_rgba(255,255,255,0.35)] sm:h-16 sm:w-16">
-                          <Image
-                            src="/logo-profile.png"
-                            alt=""
-                            width={64}
-                            height={64}
-                            className="h-full w-full object-cover"
-                            aria-hidden
-                          />
+                      {qrValue ? (
+                        <QRCodeCanvas
+                          ref={qrCanvasRef}
+                          value={qrValue}
+                          size={176}
+                          bgColor="#ffffff"
+                          fgColor="#020617"
+                          level="H"
+                          includeMargin={false}
+                        />
+                      ) : (
+                        <div className="flex h-[176px] w-[176px] items-center justify-center text-xs text-slate-400">
+                          Preparing QR…
                         </div>
-                      </div>
+                      )}
+                      {qrValue && (
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                          <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-lg bg-white shadow-[0_0_24px_rgba(255,255,255,0.7),0_0_48px_rgba(255,255,255,0.35)] sm:h-16 sm:w-16">
+                            <Image
+                              src="/logo-profile.png"
+                              alt=""
+                              width={64}
+                              height={64}
+                              className="h-full w-full object-cover"
+                              aria-hidden
+                            />
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                   <div className="flex w-full max-w-xs flex-col gap-2 sm:flex-row sm:justify-center">
                     <button
                       type="button"
                       onClick={downloadQrImage}
-                      className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-slate-900 shadow-md transition hover:bg-slate-100 active:scale-[0.99]"
+                      disabled={!qrValue}
+                      className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-slate-900 shadow-md transition hover:bg-slate-100 active:scale-[0.99] disabled:opacity-50 disabled:pointer-events-none"
                     >
                       <svg className="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -391,11 +413,11 @@ export default function Home() {
                     </button>
                   </div>
                   <p className="max-w-xs text-center text-[11px] sm:text-xs text-slate-400">
-                    Same QR style for every employee. Scan to save this
-                    contact.
+                    Scan to open this person&apos;s digital card (contact, company
+                    website &amp; profile).
                   </p>
                   <p className="max-w-xs text-center text-[10px] text-slate-500">
-                    iPhone &amp; Android: open Camera, point at QR, tap banner to add.
+                    On the card page you can save the contact to your phone.
                   </p>
                 </div>
               </div>

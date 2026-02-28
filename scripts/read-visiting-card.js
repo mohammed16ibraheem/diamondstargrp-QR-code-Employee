@@ -2,7 +2,8 @@ const XLSX = require("xlsx");
 const path = require("path");
 const fs = require("fs");
 
-const xlsxPath = path.join(__dirname, "..", "..", "DIGITAL VISITING CARD 27 JAN .xlsx");
+// Source: DIGITAL VISITING CARD 27 JAN -QR-code.xlsx — same list = same numbers in app and QR codes.
+const xlsxPath = path.join(__dirname, "..", "..", "DIGITAL VISITING CARD 27 JAN -QR-code.xlsx");
 const outPath = path.join(__dirname, "..", "app", "data", "contacts.json");
 
 const norm = (p) => {
@@ -51,8 +52,11 @@ try {
       const firstPhone = mobile || telephone;
       const secondPhone = mobile && telephone ? telephone : "";
 
+      // Preserve Excel SN so app list and QR codes use the same numbers as the sheet.
+      const snStr = sn ? String(sn).trim() : String(contacts.length + 1);
+
       contacts.push({
-        sn: sn || String(contacts.length + 1),
+        sn: snStr,
         section: sheetName,
         name: name || "—",
         title: position || "",
