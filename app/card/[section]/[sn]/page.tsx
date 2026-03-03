@@ -14,6 +14,7 @@ type Contact = {
   phonePrimary: string;
   phoneSecondary?: string;
   location: string;
+  photo?: string;
 };
 
 const contacts = contactsList as Contact[];

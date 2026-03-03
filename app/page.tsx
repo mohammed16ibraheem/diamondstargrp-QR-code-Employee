@@ -17,6 +17,7 @@ type Contact = {
   phonePrimary: string;
   phoneSecondary?: string;
   location: string;
+  photo?: string;
 };
 
 const contacts = contactsList as Contact[];
@@ -223,7 +224,17 @@ export default function Home() {
                 </div>
               </div>
               <header className="flex items-start justify-between gap-3 md:gap-4">
-                <div className="min-w-0">
+                <div className="flex min-w-0 gap-4">
+                  <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-slate-700 ring-2 ring-white/20 sm:h-20 sm:w-20">
+                    <Image
+                      src={selectedContact.photo ? `/photos/${encodeURIComponent(selectedContact.photo)}` : "/logo-profile.png"}
+                      alt=""
+                      fill
+                      className="object-cover object-center"
+                      sizes="80px"
+                    />
+                  </div>
+                  <div className="min-w-0">
                   <p className="text-[10px] sm:text-xs uppercase tracking-[0.25em] text-emerald-300/80">
                     Digital Visiting Card
                   </p>
@@ -247,6 +258,7 @@ export default function Home() {
                       {selectedContact.titleArabic && ` · ${selectedContact.titleArabic}`}
                     </p>
                   )}
+                  </div>
                 </div>
 
                 <div className="hidden xs:flex flex-col items-end gap-2 sm:gap-3">

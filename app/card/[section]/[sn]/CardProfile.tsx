@@ -15,6 +15,7 @@ type Contact = {
   phonePrimary: string;
   phoneSecondary?: string;
   location: string;
+  photo?: string;
 };
 
 const COMPANY_INFO =
@@ -119,13 +120,13 @@ export function CardProfile({
         <div className="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-xl backdrop-blur sm:p-8">
           {/* Photo placeholder + name */}
           <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start">
-            <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-slate-700 ring-2 ring-white/20">
+            <div className="relative flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-slate-700 ring-2 ring-white/20">
               <Image
-                src="/logo-profile.png"
+                src={contact.photo ? `/photos/${encodeURIComponent(contact.photo)}` : "/logo-profile.png"}
                 alt=""
-                width={96}
-                height={96}
-                className="h-full w-full object-cover"
+                fill
+                className="object-cover object-center"
+                sizes="96px"
               />
             </div>
             <div className="text-center sm:text-left">
