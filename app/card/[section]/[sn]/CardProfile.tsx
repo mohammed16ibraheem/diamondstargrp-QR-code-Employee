@@ -24,7 +24,6 @@ const COMPANY_INFO =
 function buildVcardText(contact: Contact, photoBase64?: string): string {
   const c = contact;
   const CRLF = "\r\n";
-  const BOM = "\uFEFF";
   const escape = (s: string) =>
     String(s || "")
       .replace(/\\/g, "\\\\")
@@ -51,20 +50,20 @@ function buildVcardText(contact: Contact, photoBase64?: string): string {
     "BEGIN:VCARD",
     "VERSION:3.0",
     "PRODID:-//Diamond Star Group//Digital Visiting Card//EN",
-    fold(`N:${name};;;`),
-    fold(`FN:${name}`),
-    fold(`ORG:${org}`),
-    fold(`TITLE:${title}`),
+    fold(`N;CHARSET=UTF-8:${name};;;`),
+    fold(`FN;CHARSET=UTF-8:${name}`),
+    fold(`ORG;CHARSET=UTF-8:${org}`),
+    fold(`TITLE;CHARSET=UTF-8:${title}`),
     tel1 ? fold(`TEL;TYPE=CELL,VOICE:${tel1}`) : "",
     tel2 ? fold(`TEL;TYPE=WORK,VOICE:${tel2}`) : "",
     email ? fold(`EMAIL;TYPE=INTERNET:${email}`) : "",
-    loc ? fold(`ADR;TYPE=WORK:;;${loc};;;;;`) : "",
+    loc ? fold(`ADR;TYPE=WORK;CHARSET=UTF-8:;;${loc};;;;;`) : "",
   ];
   if (photoBase64) {
     lines.push(fold(`PHOTO;ENCODING=b;TYPE=JPEG:${photoBase64}`));
   }
   lines.push("END:VCARD");
-  return BOM + lines.filter(Boolean).join(CRLF);
+  return lines.filter(Boolean).join(CRLF);
 }
 
 export function CardProfile({
@@ -138,7 +137,7 @@ export function CardProfile({
       }
     }
     const vcardText = photoBase64 ? buildVcardText(contact, photoBase64) : vcardTextBase;
-    const blob = new Blob([vcardText], { type: "text/vcard;charset=utf-8" });
+    const blob = new Blob([vcardText], { type: "text/x-vcard;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const safeName = contact.name.replace(/[^\p{L}\p{N}\s-]/gu, "").replace(/\s+/g, " ").trim() || "contact";
     const fileName = `${safeName}.vcf`;

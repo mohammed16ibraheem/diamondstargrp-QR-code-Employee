@@ -53,11 +53,16 @@ export default function Home() {
 
   const qrValue = cardPageUrl;
 
-  // vCard for "Save contact" on the main page (optional) and used on the card page.
+  // vCard for "Save contact" on the main page (optional).
   const vcardText = useMemo(() => {
     const c = selectedContact;
     const CRLF = "\r\n";
-    const escape = (s: string) => String(s || "").replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\r?\n/g, "\\n");
+    const escape = (s: string) =>
+      String(s || "")
+        .replace(/\\/g, "\\\\")
+        .replace(/;/g, "\\;")
+        .replace(/,/g, "\\,")
+        .replace(/\r?\n/g, "\\n");
     const fold = (line: string) => {
       if (line.length <= 75) return line;
       const folded: string[] = [];
@@ -79,14 +84,14 @@ export default function Home() {
     const lines = [
       "BEGIN:VCARD",
       "VERSION:3.0",
-      fold(`N:${name};;;`),
-      fold(`FN:${name}`),
-      fold(`ORG:${org}`),
-      fold(`TITLE:${title}`),
+      fold(`N;CHARSET=UTF-8:${name};;;`),
+      fold(`FN;CHARSET=UTF-8:${name}`),
+      fold(`ORG;CHARSET=UTF-8:${org}`),
+      fold(`TITLE;CHARSET=UTF-8:${title}`),
       tel1 ? fold(`TEL;TYPE=CELL,VOICE:${tel1}`) : "",
       tel2 ? fold(`TEL;TYPE=WORK,VOICE:${tel2}`) : "",
       email ? fold(`EMAIL;TYPE=INTERNET:${email}`) : "",
-      loc ? fold(`ADR;TYPE=WORK:;;${loc};;;;;`) : "",
+      loc ? fold(`ADR;TYPE=WORK;CHARSET=UTF-8:;;${loc};;;;;`) : "",
       "END:VCARD",
     ].filter(Boolean);
 
@@ -95,7 +100,7 @@ export default function Home() {
   }, [selectedContact.section, selectedContact.sn, selectedContact.name, selectedContact.title, selectedContact.company, selectedContact.phonePrimary, selectedContact.phoneSecondary, selectedContact.email, selectedContact.location]);
 
   const handleDownloadVcard = () => {
-    const blob = new Blob([vcardText], { type: "text/vcard;charset=utf-8" });
+    const blob = new Blob([vcardText], { type: "text/x-vcard;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
