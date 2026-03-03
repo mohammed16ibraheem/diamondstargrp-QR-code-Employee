@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 
 type Contact = {
   sn: string;
@@ -21,6 +21,54 @@ type Contact = {
 const COMPANY_INFO =
   "The Diamond Star Group is a coalition of companies committed to revolutionizing the recycling industry through sustainable practices and innovative technology. Operating across the Kingdom of Saudi Arabia, the United Arab Emirates, Singapore, Japan, China and India.";
 
+function buildVcardText(contact: Contact, photoBase64?: string): string {
+  const c = contact;
+  const CRLF = "\r\n";
+  const BOM = "\uFEFF";
+  const escape = (s: string) =>
+    String(s || "")
+      .replace(/\\/g, "\\\\")
+      .replace(/;/g, "\\;")
+      .replace(/,/g, "\\,")
+      .replace(/\r?\n/g, "\\n");
+  const fold = (line: string) => {
+    if (line.length <= 75) return line;
+    const folded: string[] = [];
+    for (let i = 0; i < line.length; i += 75) {
+      const chunk = line.slice(i, i + 75);
+      folded.push(folded.length === 0 ? chunk : " " + chunk);
+    }
+    return folded.join(CRLF);
+  };
+  const name = escape(c.name);
+  const title = escape(c.title);
+  const org = escape(c.company);
+  const loc = c.location ? escape(c.location) : "";
+  const tel1 = (c.phonePrimary || "").replace(/\s/g, "");
+  const tel2 = (c.phoneSecondary || "").replace(/\s/g, "");
+  const email = c.email && c.email.includes("@") ? c.email : "";
+  const lines = [
+    "BEGIN:VCARD",
+    "VERSION:3.0",
+    "PRODID:-//Diamond Star Group//Digital Visiting Card//EN",
+    fold(`N:${name};;;`),
+    fold(`FN:${name}`),
+    fold(`ORG:${org}`),
+    fold(`TITLE:${title}`),
+    tel1 ? fold(`TEL;TYPE=CELL,VOICE:${tel1}`) : "",
+    tel2 ? fold(`TEL;TYPE=WORK,VOICE:${tel2}`) : "",
+    email ? fold(`EMAIL;TYPE=INTERNET:${email}`) : "",
+    loc ? fold(`ADR;TYPE=WORK:;;${loc};;;;;`) : "",
+  ];
+  if (photoBase64) {
+    const ext = (c.photo || "").toLowerCase();
+    const type = ext.endsWith(".png") ? "PNG" : "JPEG";
+    lines.push(fold(`PHOTO;ENCODING=b;TYPE=${type}:${photoBase64}`));
+  }
+  lines.push("END:VCARD");
+  return BOM + lines.filter(Boolean).join(CRLF);
+}
+
 export function CardProfile({
   contact,
   companyWebsite,
@@ -30,50 +78,34 @@ export function CardProfile({
   companyWebsite: string;
   companyProfilePdf: string;
 }) {
-  const vcardText = useMemo(() => {
-    const c = contact;
-    const CRLF = "\r\n";
-    const BOM = "\uFEFF"; // UTF-8 BOM for better mobile compatibility
-    const escape = (s: string) =>
-      String(s || "")
-        .replace(/\\/g, "\\\\")
-        .replace(/;/g, "\\;")
-        .replace(/,/g, "\\,")
-        .replace(/\r?\n/g, "\\n");
-    const fold = (line: string) => {
-      if (line.length <= 75) return line;
-      const folded: string[] = [];
-      for (let i = 0; i < line.length; i += 75) {
-        const chunk = line.slice(i, i + 75);
-        folded.push(folded.length === 0 ? chunk : " " + chunk);
-      }
-      return folded.join(CRLF);
-    };
-    const name = escape(c.name);
-    const title = escape(c.title);
-    const org = escape(c.company);
-    const loc = c.location ? escape(c.location) : "";
-    const tel1 = (c.phonePrimary || "").replace(/\s/g, "");
-    const tel2 = (c.phoneSecondary || "").replace(/\s/g, "");
-    const email = c.email && c.email.includes("@") ? c.email : "";
-    const lines = [
-      "BEGIN:VCARD",
-      "VERSION:3.0",
-      "PRODID:-//Diamond Star Group//Digital Visiting Card//EN",
-      fold(`N:${name};;;`),
-      fold(`FN:${name}`),
-      fold(`ORG:${org}`),
-      fold(`TITLE:${title}`),
-      tel1 ? fold(`TEL;TYPE=CELL,VOICE:${tel1}`) : "",
-      tel2 ? fold(`TEL;TYPE=WORK,VOICE:${tel2}`) : "",
-      email ? fold(`EMAIL;TYPE=INTERNET:${email}`) : "",
-      loc ? fold(`ADR;TYPE=WORK:;;${loc};;;;;`) : "",
-      "END:VCARD",
-    ].filter(Boolean);
-    return BOM + lines.join(CRLF);
-  }, [contact]);
+  const [addingContact, setAddingContact] = useState(false);
+  const vcardTextBase = useMemo(() => buildVcardText(contact), [contact]);
 
-  const handleAddToContacts = () => {
+  const handleAddToContacts = async () => {
+    setAddingContact(true);
+    let photoBase64: string | undefined;
+    if (contact.photo) {
+      try {
+        const photoUrl = `/photos/${encodeURIComponent(contact.photo)}`;
+        const res = await fetch(photoUrl);
+        if (res.ok) {
+          const blob = await res.blob();
+          photoBase64 = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+              const dataUrl = reader.result as string;
+              const base64 = dataUrl.split(",")[1];
+              resolve(base64 || "");
+            };
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+          });
+        }
+      } catch {
+        // fallback: save without photo
+      }
+    }
+    const vcardText = photoBase64 ? buildVcardText(contact, photoBase64) : vcardTextBase;
     const blob = new Blob([vcardText], { type: "text/vcard;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const safeName = contact.name.replace(/[^\p{L}\p{N}\s-]/gu, "").replace(/\s+/g, " ").trim() || "contact";
@@ -87,6 +119,7 @@ export function CardProfile({
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+    setAddingContact(false);
   };
 
   return (
@@ -198,17 +231,18 @@ export function CardProfile({
             </div>
           </div>
 
-          {/* Add to Contacts — works on iPhone & Android */}
+          {/* Add to Contacts — works on iPhone & Android, includes profile photo */}
           <div className="mt-6">
             <button
               type="button"
               onClick={handleAddToContacts}
-              className="w-full rounded-xl bg-emerald-500 px-4 py-4 text-base font-semibold text-slate-950 shadow-lg transition active:scale-[0.98] hover:bg-emerald-400"
+              disabled={addingContact}
+              className="w-full rounded-xl bg-emerald-500 px-4 py-4 text-base font-semibold text-slate-950 shadow-lg transition active:scale-[0.98] hover:bg-emerald-400 disabled:opacity-70 disabled:cursor-wait"
             >
-              Add to Contacts
+              {addingContact ? "Preparing…" : "Add to Contacts"}
             </button>
             <p className="mt-2 text-center text-xs text-slate-500">
-              Saves to your phone — iPhone & Android. Tap the file if prompted to add.
+              Saves name, photo, and details to your phone — iPhone &amp; Android. Tap the file if prompted to add.
             </p>
           </div>
         </div>
