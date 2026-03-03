@@ -61,9 +61,7 @@ function buildVcardText(contact: Contact, photoBase64?: string): string {
     loc ? fold(`ADR;TYPE=WORK:;;${loc};;;;;`) : "",
   ];
   if (photoBase64) {
-    const ext = (c.photo || "").toLowerCase();
-    const type = ext.endsWith(".png") ? "PNG" : "JPEG";
-    lines.push(fold(`PHOTO;ENCODING=b;TYPE=${type}:${photoBase64}`));
+    lines.push(fold(`PHOTO;ENCODING=b;TYPE=JPEG:${photoBase64}`));
   }
   lines.push("END:VCARD");
   return BOM + lines.filter(Boolean).join(CRLF);
@@ -81,6 +79,49 @@ export function CardProfile({
   const [addingContact, setAddingContact] = useState(false);
   const vcardTextBase = useMemo(() => buildVcardText(contact), [contact]);
 
+  const imageToContactPhotoBase64 = (blob: Blob): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const img = new window.Image();
+      const url = URL.createObjectURL(blob);
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        const max = 256;
+        let w = img.naturalWidth;
+        let h = img.naturalHeight;
+        if (w > max || h > max) {
+          if (w > h) {
+            h = Math.round((h * max) / w);
+            w = max;
+          } else {
+            w = Math.round((w * max) / h);
+            h = max;
+          }
+        }
+        const canvas = document.createElement("canvas");
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          reject(new Error("Canvas not supported"));
+          return;
+        }
+        ctx.drawImage(img, 0, 0, w, h);
+        try {
+          const dataUrl = canvas.toDataURL("image/jpeg", 0.9);
+          const base64 = dataUrl.split(",")[1] || "";
+          resolve(base64);
+        } catch {
+          reject(new Error("toDataURL failed"));
+        }
+      };
+      img.onerror = () => {
+        URL.revokeObjectURL(url);
+        reject(new Error("Image load failed"));
+      };
+      img.src = url;
+    });
+  };
+
   const handleAddToContacts = async () => {
     setAddingContact(true);
     let photoBase64: string | undefined;
@@ -90,16 +131,7 @@ export function CardProfile({
         const res = await fetch(photoUrl);
         if (res.ok) {
           const blob = await res.blob();
-          photoBase64 = await new Promise<string>((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-              const dataUrl = reader.result as string;
-              const base64 = dataUrl.split(",")[1];
-              resolve(base64 || "");
-            };
-            reader.onerror = reject;
-            reader.readAsDataURL(blob);
-          });
+          photoBase64 = await imageToContactPhotoBase64(blob);
         }
       } catch {
         // fallback: save without photo
