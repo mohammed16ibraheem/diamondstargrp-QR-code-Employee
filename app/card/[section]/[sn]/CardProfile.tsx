@@ -116,37 +116,39 @@ export function CardProfile({
           </a>
         </div>
 
-        {/* Contact card */}
+        {/* Contact card — optimized for users who scanned the QR */}
         <div className="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-xl backdrop-blur sm:p-8">
-          {/* Photo placeholder + name */}
-          <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start">
-            <div className="relative flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-slate-700 ring-2 ring-white/20">
+          {/* Hero: profile photo first (main representation for scanners) */}
+          <div className="flex flex-col items-center text-center">
+            <div className="relative h-32 w-32 shrink-0 overflow-hidden rounded-2xl bg-slate-700 ring-2 ring-white/20 shadow-xl sm:h-40 sm:w-40">
               <Image
                 src={contact.photo ? `/photos/${encodeURIComponent(contact.photo)}` : "/logo-profile.png"}
-                alt=""
+                alt={contact.name}
                 fill
                 className="object-cover object-center"
-                sizes="96px"
+                sizes="(max-width: 640px) 128px, 160px"
+                priority
               />
             </div>
-            <div className="text-center sm:text-left">
-              <p className="text-xs font-medium uppercase tracking-wider text-emerald-400">
-                {contact.section}
+            <p className="mt-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-emerald-400/90">
+              Digital Visiting Card
+            </p>
+            <p className="mt-2 text-xs font-medium uppercase tracking-wider text-slate-400">
+              {contact.section}
+            </p>
+            <h1 className="mt-2 text-2xl font-semibold text-white sm:text-3xl">
+              {contact.name}
+            </h1>
+            <p className="mt-1 text-slate-300">{contact.title}</p>
+            <p className="mt-1 text-sm font-medium text-emerald-300/90">
+              {contact.company}
+            </p>
+            {contact.nameArabic && (
+              <p className="mt-2 text-sm text-slate-400" dir="rtl">
+                {contact.nameArabic}
+                {contact.titleArabic && ` · ${contact.titleArabic}`}
               </p>
-              <h1 className="mt-1 text-2xl font-semibold text-white sm:text-3xl">
-                {contact.name}
-              </h1>
-              <p className="mt-1 text-slate-300">{contact.title}</p>
-              <p className="mt-1 text-sm font-medium text-emerald-300/90">
-                {contact.company}
-              </p>
-              {contact.nameArabic && (
-                <p className="mt-2 text-sm text-slate-400" dir="rtl">
-                  {contact.nameArabic}
-                  {contact.titleArabic && ` · ${contact.titleArabic}`}
-                </p>
-              )}
-            </div>
+            )}
           </div>
 
           {/* Contact details */}
