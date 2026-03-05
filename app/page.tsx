@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { QRCodeCanvas } from "qrcode.react";
 import contactsList from "./data/contacts.json";
+import { toTitleCase } from "@/app/lib/format";
 
 type Contact = {
   sn: string;
@@ -173,6 +174,7 @@ export default function Home() {
                 className="object-cover object-center"
                 sizes="64px"
                 priority
+                unoptimized
               />
             </div>
             <div className="min-w-0">
@@ -206,7 +208,7 @@ export default function Home() {
                   >
                     {sections.map((sec) => (
                       <option key={sec} value={sec}>
-                        {sec}
+                        {toTitleCase(sec)}
                       </option>
                     ))}
                   </select>
@@ -222,7 +224,7 @@ export default function Home() {
                   >
                     {contactsInSection.map((c, i) => (
                       <option key={`${c.section}-${c.sn}-${i}`} value={i}>
-                        {c.name} — {c.title}
+                        {toTitleCase(c.name)} — {toTitleCase(c.title)}
                       </option>
                     ))}
                   </select>
@@ -237,6 +239,7 @@ export default function Home() {
                       fill
                       className="object-cover object-center"
                       sizes="80px"
+                      unoptimized
                     />
                   </div>
                   <div className="min-w-0">
@@ -244,17 +247,17 @@ export default function Home() {
                     Digital Visiting Card
                   </p>
                   <h1 className="mt-2 text-2xl sm:text-3xl md:text-4xl font-semibold tracking-tight leading-snug">
-                    {selectedContact.name}
+                    {toTitleCase(selectedContact.name)}
                   </h1>
                   <p className="mt-1.5 text-sm sm:text-base text-slate-300">
-                    {selectedContact.title}
+                    {toTitleCase(selectedContact.title)}
                   </p>
                   <p className="mt-1 flex flex-wrap items-center gap-2">
                     <span className="text-[13px] sm:text-sm font-medium text-emerald-300">
-                      {selectedContact.company}
+                      {toTitleCase(selectedContact.company)}
                     </span>
                     <span className="rounded border border-white/20 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-wider text-slate-400">
-                      {selectedContact.section}
+                      {toTitleCase(selectedContact.section)}
                     </span>
                   </p>
                   {selectedContact.nameArabic && (
@@ -410,6 +413,7 @@ export default function Home() {
                               height={64}
                               className="h-full w-full object-cover"
                               aria-hidden
+                              unoptimized
                             />
                           </div>
                         </div>

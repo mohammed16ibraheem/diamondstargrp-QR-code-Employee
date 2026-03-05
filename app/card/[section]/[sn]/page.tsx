@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import contactsList from "@/app/data/contacts.json";
+import { toTitleCase } from "@/app/lib/format";
 import { CardProfile } from "./CardProfile";
 
 type Contact = {
@@ -20,6 +21,7 @@ type Contact = {
 const contacts = contactsList as Contact[];
 const COMPANY_WEBSITE = "https://diamondstargrp.com/ar/";
 const COMPANY_PROFILE_PDF = "/ds-company-profile-eng.pdf";
+const COMPANY_LINKEDIN = "https://www.linkedin.com/company/diamond-star-group/";
 
 function getContact(section: string, sn: string): Contact | null {
   const s = decodeURIComponent(section);
@@ -36,8 +38,8 @@ export async function generateMetadata({
   const contact = getContact(section, sn);
   if (!contact) return { title: "Digital Visiting Card" };
   return {
-    title: `${contact.name} | ${contact.title} | Diamond Star`,
-    description: `Digital visiting card for ${contact.name}, ${contact.title} at ${contact.company}. Diamond Star Group - Leading the way in recycling and sustainability.`,
+    title: `${toTitleCase(contact.name)} | ${toTitleCase(contact.title)} | Diamond Star`,
+    description: `Digital visiting card for ${toTitleCase(contact.name)}, ${toTitleCase(contact.title)} at ${toTitleCase(contact.company)}. Diamond Star Group - Leading the way in recycling and sustainability.`,
   };
 }
 
@@ -62,6 +64,7 @@ export default async function CardPage({
       contact={contact}
       companyWebsite={COMPANY_WEBSITE}
       companyProfilePdf={COMPANY_PROFILE_PDF}
+      companyLinkedIn={COMPANY_LINKEDIN}
     />
   );
 }

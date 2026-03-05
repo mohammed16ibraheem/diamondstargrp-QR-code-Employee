@@ -5,7 +5,8 @@ const PRODUCTION_HOST = "diamondstargrp-qr-code-employee.vercel.app";
 
 export function middleware(request: NextRequest) {
   const host = request.headers.get("host") || "";
-  if (!host || host === PRODUCTION_HOST) {
+  // Allow localhost (dev) and production host
+  if (!host || host === PRODUCTION_HOST || host.startsWith("localhost")) {
     return NextResponse.next();
   }
   // Redirect any other Vercel URL (preview/deployment) to main app URL so one place for content
