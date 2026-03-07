@@ -18,12 +18,12 @@ So the flow is: we generate and share the QR → they scan → they see the card
 • Two sections: GREEN CITY and DSA Group, with the full list of employees per section.
 • Per-employee card: name, title, company, Arabic name/title, mobile, office, email, address.
 • Profile photos: where a “Fresh Digital Photograph” image exists, it is shown on the card and is included when the contact is saved (so the contact appears with the correct photo in the phone’s contacts).
-  - With photos configured today (21 employees):
+  - With photos configured today (22 employees):
     • GREEN CITY: ABDULLAH M BASSAM KUBAISI, MUJTABA ALI QURAISHI, WESAL AHMAD JAFRI.
-    • DSA Group: KHALID MOHSIN ALI TANWAR, MUHAMMED USMAN TANWAR, MUHAMMED OMER TANWAR, FAKHARUDDIN QASMI, MOHAMMADISMAIL, JAFARALI NOOR, HOSSAM BAKHEET AL-BISHRI, RAJESH RADHA GOPALAN, ABDUL RASHEED P.C., AKASH AKHTAR, MUHAMMAD AHMAD, Masroor Ul Hassan Noor, Muhammad Nawaz, Osama Amjad, ISMAIL GIBREEL ISMAIL ABDELRAHMAN, MAAN MAJDI ALI AL KHALDI, ALAA HASSAN RASLAN ALI, JIHAD ISMAIL ARTAN ALI.
-  - Photos still to be captured/approved (14 employees):
+    • DSA Group: KHALID MOHSIN ALI TANWAR, MUHAMMED USMAN TANWAR, MUHAMMED OMER TANWAR, FAKHARUDDIN QASMI, MOHAMMADISMAIL, JAFARALI NOOR, HOSSAM BAKHEET AL-BISHRI, RAJESH RADHA GOPALAN, ABDUL RASHEED P.C., MOHAMMAD ABDUS SAMAD, AKASH AKHTAR, MUHAMMAD AHMAD, Masroor Ul Hassan Noor, Muhammad Nawaz, Osama Amjad, ISMAIL GIBREEL ISMAIL ABDELRAHMAN, MAAN MAJDI ALI AL KHALDI, ALAA HASSAN RASLAN ALI, JIHAD ISMAIL ARTAN ALI.
+  - Photos still to be captured/approved (13 employees):
     • GREEN CITY: ABDULLAH ATIF, MAJDI MOHAMMAD AL-GHAMDI, TAMER ALI EL SEISY, AMIN ABDULGAFFAR PATNI, ABDULLAH MESFER MUFLEH AL MALKI, AMEER REHMAN, MUHAMMAD AMEER ALI, SYED UMER ALI.
-    • DSA Group: BASARAT ALI TANWAR, ABDULAZIZ MOHAMMAD IBRAHIM, MOHAMMAD ABDUS SAMAD, EL TIYAB YOUNAS, KHURSHID AHMAD, MR. Jihad (New Position).
+    • DSA Group: BASARAT ALI TANWAR, ABDULAZIZ MOHAMMAD IBRAHIM, EL TIYAB YOUNAS, KHURSHID AHMAD, MR. Jihad (New Position).
 • QR code: unique per person; points to that person’s card so scans always show the right contact.
 • Add to Contacts: one tap downloads a vCard (.vcf) that works on both Android and iPhone, with name, numbers, email, address, and photo when available.
 • Company branding: Diamond Star logo and link to company website; option to download the company profile PDF from the card page.
